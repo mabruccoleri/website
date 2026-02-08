@@ -12,7 +12,11 @@ export default defineConfig(({ mode }) => {
       plugins: [react()],
       define: {
         'process.env.API_KEY': JSON.stringify(env.GEMINI_API_KEY),
-        'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY)
+        'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY),
+        'process.env.REACT_APP_STRAVA_CLIENT_ID': JSON.stringify(env.REACT_APP_STRAVA_CLIENT_ID),
+        'process.env.REACT_APP_STRAVA_CLIENT_SECRET': JSON.stringify(env.REACT_APP_STRAVA_CLIENT_SECRET),
+        'process.env.REACT_APP_STRAVA_REFRESH_TOKEN': JSON.stringify(env.REACT_APP_STRAVA_REFRESH_TOKEN),
+        'process.env.REACT_APP_STRAVA_ATHLETE_ID': JSON.stringify(env.REACT_APP_STRAVA_ATHLETE_ID)
       },
       resolve: {
         alias: {

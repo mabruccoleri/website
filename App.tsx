@@ -5,11 +5,13 @@ import { MusicWidget } from './components/MusicWidget';
 import { AdventureMap } from './components/AdventureMap';
 import { GlobeWidget } from './components/GlobeWidget';
 import { cyclingData, albumStats, adventures, cyclingRoutes } from './data';
+import { getStravaStats } from './strava';
 import { Globe, Database, ToggleLeft, ToggleRight, Sun, Moon } from 'lucide-react';
 
 const App: React.FC = () => {
   const [isEngineerMode, setIsEngineerMode] = useState(true);
   const [isDarkMode, setIsDarkMode] = useState(true);
+  const [realTimeCyclingData, setRealTimeCyclingData] = useState(cyclingData);
 
   // Initialize theme based on preference or default to dark
   useEffect(() => {
@@ -20,8 +22,38 @@ const App: React.FC = () => {
     }
   }, [isDarkMode]);
 
+  // Fetch Strava Data on mount
+  useEffect(() => {
+    const syncStrava = async () => {
+      const stats = await getStravaStats();
+      if (stats) {
+        const currentYear = new Date().getFullYear();
+        const co2Factor = 0.284; // kg CO2 saved per mile
+
+        setRealTimeCyclingData(prevData => {
+          const newData = [...prevData];
+          const yearIndex = newData.findIndex(d => d.year === currentYear);
+          
+          const newEntry = {
+            year: currentYear,
+            miles: stats.miles,
+            co2SavedKg: Math.round(stats.miles * co2Factor)
+          };
+
+          if (yearIndex >= 0) {
+            newData[yearIndex] = newEntry;
+          } else {
+            newData.push(newEntry);
+          }
+          return newData;
+        });
+      }
+    };
+    syncStrava();
+  }, []);
+
   // Calculate total miles from data
-  const totalMiles = cyclingData.reduce((acc, curr) => acc + curr.miles, 0);
+  const totalMiles = realTimeCyclingData.reduce((acc, curr) => acc + curr.miles, 0);
 
   return (
     <div className="min-h-screen bg-earth-50 dark:bg-earth-900 text-earth-900 dark:text-earth-100 font-sans selection:bg-moss-500 selection:text-white pb-20 transition-colors duration-300">
@@ -85,7 +117,7 @@ const App: React.FC = () => {
 
             {/* Cycling Metrics (Charts) - Spans 4 cols */}
             <div className="md:col-span-4 md:row-span-2">
-                <CyclingWidget data={cyclingData} isEngineerMode={isEngineerMode} isDarkMode={isDarkMode} />
+                <CyclingWidget data={realTimeCyclingData} isEngineerMode={isEngineerMode} isDarkMode={isDarkMode} />
             </div>
 
              {/* Music / Culture - Spans 12 cols */}
