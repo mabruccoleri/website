@@ -1,19 +1,15 @@
 import { AlbumStats, CyclingStats, ExperienceItem, SkillCategory, Adventure, CyclingRoute } from './types';
 
-export const cyclingData: CyclingStats[] = [
-  { year: 2020, miles: 1200, co2SavedKg: 340 },
-  { year: 2021, miles: 2100, co2SavedKg: 596 },
-  { year: 2022, miles: 3400, co2SavedKg: 965 },
-  { year: 2023, miles: 4100, co2SavedKg: 1164 },
-  { year: 2024, miles: 4500, co2SavedKg: 1278 },
-];
+export const cyclingData: CyclingStats[] = [];
 
 export const albumStats: AlbumStats = {
-  totalListened: 412,
-  averageRating: 3.8,
-  topGenre: "Post-Punk",
-  recentAlbum: "Remain in Light - Talking Heads",
-  recentRating: 5
+  totalListened: 0,
+  averageRating: 0,
+  topGenre: "Loading...",
+  recentAlbum: "Loading...",
+  recentArtist: "",
+  recentRating: 0,
+  topAlbums: []
 };
 
 export const adventures: Adventure[] = [

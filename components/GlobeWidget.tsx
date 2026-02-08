@@ -11,16 +11,34 @@ interface Props {
 export const GlobeWidget: React.FC<Props> = ({ totalMiles, isEngineerMode, isDarkMode }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const canvasContainerRef = useRef<HTMLDivElement>(null);
   
   // Interactive State & Refs
   const tooltipRef = useRef<HTMLDivElement>(null);
   const mousePosRef = useRef<{x: number, y: number} | null>(null);
-  const isHoveringRef = useRef(false); // To avoid stale closures in animation loop
+  const isHoveringRef = useRef(false); 
   const [isHovering, setIsHovering] = useState(false);
+  const [statIndex, setStatIndex] = useState(0);
   
   const EARTH_CIRCUMFERENCE = 24901;
   const orbits = totalMiles / EARTH_CIRCUMFERENCE;
   const percentage = (orbits % 1) * 100;
+
+  const comparisons = [
+      { label: "% to next orbit", value: `${percentage.toFixed(1)}%` },
+      { label: "Trips to the Moon", value: `${(totalMiles / 238855 * 100).toFixed(2)}%` },
+      { label: "NYC ⇄ LA Road Trips", value: `${(totalMiles / 2790).toFixed(1)}x` },
+      { label: "Tour de France Loops", value: `${(totalMiles / 2200).toFixed(1)}x` },
+      { label: "Great Walls of China", value: `${(totalMiles / 13171).toFixed(2)}x` },
+      { label: "Proclaimers' Walks", value: `${(totalMiles / 500).toFixed(0)}x` }
+  ];
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+        setStatIndex(prev => (prev + 1) % comparisons.length);
+    }, 4000);
+    return () => clearInterval(interval);
+  }, []);
 
   const handleMouseMove = (e: React.MouseEvent) => {
     if (!containerRef.current) return;
@@ -65,35 +83,57 @@ export const GlobeWidget: React.FC<Props> = ({ totalMiles, isEngineerMode, isDar
         });
     }
 
+    // Handle Resize
+    const handleResize = () => {
+        if (!canvas || !canvasContainerRef.current) return;
+        const rect = canvasContainerRef.current.getBoundingClientRect();
+        if (rect && rect.width > 0 && rect.height > 0) {
+             const dpr = window.devicePixelRatio || 1;
+             canvas.width = rect.width * dpr;
+             canvas.height = rect.height * dpr;
+             ctx.scale(dpr, dpr);
+             // Do not set style.width/height as they are controlled by flexbox
+        }
+    };
+    
+    // Initial resize and Observer
+    handleResize();
+    const resizeObserver = new ResizeObserver(() => {
+        handleResize();
+    });
+    if (canvasContainerRef.current) {
+        resizeObserver.observe(canvasContainerRef.current);
+    }
+
     const render = () => {
         if (!canvas || !ctx) return;
         
-        // Resize handling
-        const dpr = window.devicePixelRatio || 1;
         const rect = canvas.getBoundingClientRect();
-        canvas.width = rect.width * dpr;
-        canvas.height = rect.height * dpr;
-        ctx.scale(dpr, dpr);
-        
         const centerX = rect.width / 2;
         const centerY = rect.height / 2;
 
+        // Clear canvas
         ctx.clearRect(0, 0, rect.width, rect.height);
         
         // Update rotation
         rotation += 0.005;
 
         // Colors based on mode
-        const DOT_COLOR = isDarkMode ? 'rgba(163, 177, 138,' : 'rgba(88, 129, 87,'; // moss-400 vs moss-500
-        const ORBIT_COLOR = isDarkMode ? 'rgba(224, 122, 95, 0.3)' : 'rgba(209, 96, 66, 0.3)'; // clay-400 vs clay-500
-        const SAT_COLOR = isDarkMode ? '#e07a5f' : '#d16042';
+        // Dark Mode: Lime (moss-400), Light Mode: Deep Green (moss-600)
+        const r = isDarkMode ? 190 : 77;
+        const g = isDarkMode ? 242 : 124;
+        const b = isDarkMode ? 100 : 15;
+        
+        // Dark Mode: Orange (clay-400), Light Mode: Burnt Orange (clay-500)
+        const ORBIT_COLOR = isDarkMode ? 'rgba(251, 146, 60, 0.3)' : 'rgba(234, 88, 12, 0.3)';
+        const SAT_COLOR = isDarkMode ? '#fb923c' : '#ea580c';
 
         // Draw Globe Dots
         dots.forEach(dot => {
-            const r = RADIUS;
-            const x3d = r * Math.cos(dot.lat) * Math.cos(dot.lon + rotation);
-            const y3d = r * Math.sin(dot.lat);
-            const z3d = r * Math.cos(dot.lat) * Math.sin(dot.lon + rotation);
+            const rad = RADIUS;
+            const x3d = rad * Math.cos(dot.lat) * Math.cos(dot.lon + rotation);
+            const y3d = rad * Math.sin(dot.lat);
+            const z3d = rad * Math.cos(dot.lat) * Math.sin(dot.lon + rotation);
             
             const perspective = 300;
             const scale = perspective / (perspective - z3d);
@@ -101,11 +141,11 @@ export const GlobeWidget: React.FC<Props> = ({ totalMiles, isEngineerMode, isDar
             const x2d = centerX + x3d * scale;
             const y2d = centerY + y3d * scale;
             
-            const alpha = Math.max(0.1, (z3d + r) / (2 * r));
+            const alpha = Math.max(0.1, (z3d + rad) / (2 * rad));
             
             ctx.beginPath();
             ctx.arc(x2d, y2d, DOT_RADIUS * scale, 0, Math.PI * 2);
-            ctx.fillStyle = `${DOT_COLOR} ${alpha})`; 
+            ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${alpha})`; 
             ctx.fill();
         });
 
@@ -202,6 +242,7 @@ export const GlobeWidget: React.FC<Props> = ({ totalMiles, isEngineerMode, isDar
     render();
 
     return () => {
+        resizeObserver.disconnect();
         cancelAnimationFrame(animationFrameId);
     };
   }, [totalMiles, isDarkMode]); // Re-init if totalMiles or theme changes
@@ -256,7 +297,10 @@ export const GlobeWidget: React.FC<Props> = ({ totalMiles, isEngineerMode, isDar
          <div className="text-[10px] text-earth-500 uppercase tracking-widest">Earth Circumnavigations</div>
       </div>
 
-      <div className="flex-1 flex items-center justify-center relative min-h-[200px]">
+      <div 
+        ref={canvasContainerRef}
+        className="flex-1 flex items-center justify-center relative min-h-[200px]"
+      >
         <canvas ref={canvasRef} className="w-full h-full cursor-crosshair" />
         
         {/* Floating Tooltip - Positioned via Ref */}
@@ -291,9 +335,13 @@ export const GlobeWidget: React.FC<Props> = ({ totalMiles, isEngineerMode, isDar
 
         {/* Central Data Overlay */}
         <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-4 text-xs font-mono z-10 pointer-events-none">
-             <div className="bg-white/80 dark:bg-earth-900/80 backdrop-blur border border-earth-200 dark:border-earth-700 px-3 py-1 rounded text-moss-600 dark:text-moss-300 flex items-center gap-2">
+             <div 
+                className="bg-white/80 dark:bg-earth-900/80 backdrop-blur border border-earth-200 dark:border-earth-700 px-3 py-1 rounded text-moss-600 dark:text-moss-300 flex items-center gap-2 transition-all duration-300 cursor-help pointer-events-auto"
+                onClick={() => setStatIndex((statIndex + 1) % comparisons.length)}
+                title="Click for next comparison"
+            >
                 <Activity className="w-3 h-3" />
-                {percentage.toFixed(1)}% to next orbit
+                <span>{comparisons[statIndex].value} {comparisons[statIndex].label}</span>
              </div>
         </div>
       </div>

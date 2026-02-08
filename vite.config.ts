@@ -16,7 +16,9 @@ export default defineConfig(({ mode }) => {
         'process.env.REACT_APP_STRAVA_CLIENT_ID': JSON.stringify(env.REACT_APP_STRAVA_CLIENT_ID),
         'process.env.REACT_APP_STRAVA_CLIENT_SECRET': JSON.stringify(env.REACT_APP_STRAVA_CLIENT_SECRET),
         'process.env.REACT_APP_STRAVA_REFRESH_TOKEN': JSON.stringify(env.REACT_APP_STRAVA_REFRESH_TOKEN),
-        'process.env.REACT_APP_STRAVA_ATHLETE_ID': JSON.stringify(env.REACT_APP_STRAVA_ATHLETE_ID)
+        'process.env.REACT_APP_STRAVA_ATHLETE_ID': JSON.stringify(env.REACT_APP_STRAVA_ATHLETE_ID),
+        'process.env.REACT_APP_INTERVALS_ATHLETE_ID': JSON.stringify(env.REACT_APP_INTERVALS_ATHLETE_ID),
+        'process.env.REACT_APP_INTERVALS_API_KEY': JSON.stringify(env.REACT_APP_INTERVALS_API_KEY)
       },
       resolve: {
         alias: {

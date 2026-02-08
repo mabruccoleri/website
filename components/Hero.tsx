@@ -20,7 +20,7 @@ export const Hero: React.FC<Props> = ({ isEngineerMode }) => {
                 {/* Scanline Effect */}
                 <div className="absolute inset-0 bg-gradient-to-b from-transparent via-moss-500/5 to-transparent h-1/4 w-full animate-scan pointer-events-none z-20"></div>
                 <img 
-                    src="https://picsum.photos/400/400" 
+                    src="/headshot.jpg" 
                     alt="Marcus" 
                     className="w-full h-full object-cover filter grayscale contrast-125"
                 />
@@ -49,7 +49,7 @@ export const Hero: React.FC<Props> = ({ isEngineerMode }) => {
             </div>
 
             <div className="mt-auto pt-6 flex gap-2">
-                <a href="#" className="flex-1 bg-white dark:bg-earth-700 hover:bg-moss-50 dark:hover:bg-moss-600 text-earth-700 dark:text-white py-2 rounded text-center text-xs font-mono transition-colors flex items-center justify-center gap-2 border border-earth-200 dark:border-earth-600 shadow-sm hover:border-moss-400">
+                <a href="https://github.com/mabruccoleri" target="_blank" rel="noopener noreferrer" className="flex-1 bg-white dark:bg-earth-700 hover:bg-moss-50 dark:hover:bg-moss-600 text-earth-700 dark:text-white py-2 rounded text-center text-xs font-mono transition-colors flex items-center justify-center gap-2 border border-earth-200 dark:border-earth-600 shadow-sm hover:border-moss-400">
                     <Github className="w-3 h-3" /> GITHUB
                 </a>
                 <a href="https://www.linkedin.com/in/marcus-bruccoleri" target="_blank" rel="noopener noreferrer" className="flex-1 bg-white dark:bg-earth-700 hover:bg-[#0077b5]/10 dark:hover:bg-[#0077b5] text-earth-700 dark:text-white py-2 rounded text-center text-xs font-mono transition-colors flex items-center justify-center gap-2 border border-earth-200 dark:border-earth-600 shadow-sm hover:border-[#0077b5]">
